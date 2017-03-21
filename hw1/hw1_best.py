@@ -51,10 +51,7 @@ train_x = np.asarray(train_x)
 train_y = np.asarray(train_y).reshape((len(train_y),1))
 
 
-# Linear Regression and Gradient Descent
-
-# n = 5652, p = 163
-# train_x = 5652 X 163, train_y = 5652 X 1, weight_vector = 163 X 1
+# Polynomial Regression and Gradient Descent
 weight_vector = np.dot(np.dot(np.linalg.inv(np.dot(train_x.T, train_x)), train_x.T),train_y)
 prev_gra = np.zeros([p,1], dtype = float)
 learning_rate = 0.0001
@@ -70,7 +67,6 @@ for i in range(iterations):
 
 
 # PM 2.5 Calculation
-
 testing_data = open(sys.argv[2], "r")
 row = csv.reader(testing_data, delimiter = ",")
 test_x = []

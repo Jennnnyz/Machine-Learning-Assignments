@@ -30,18 +30,20 @@ training_data.close()
 train_x = []
 train_y = []
 hours = range(2,9)
+
 #features: AMB_TEMP, O3, PM10, PM2.5, RH, wind_speed
-features = [0,7,8,9,11,16]
-squares = [8,9]
+features = [0,7,8,9,11]
+squares = []
 rows = len(features)
 
 for i in range(12):
 	for j in range(471):
-		train_x.append([0.5])
+		train_x.append([1])
 		for f in features:
 			for s in hours:
 				train_x[471*i+j].append(data[f][480*i+j+s])
 				if f in squares:
+                    #append the square terms
 					train_x[471*i+j].append((data[f][480*i+j+s])**2)
 		train_y.append(data[9][480*i+j+9])
 
@@ -52,14 +54,11 @@ train_y = np.asarray(train_y).reshape((len(train_y),1))
 
 
 # Linear Regression and Gradient Descent
-
-# n = 5652, p = 163
-# train_x = 5652 X 163, train_y = 5652 X 1, weight_vector = 163 X 1
 weight_vector = np.empty([p,1], dtype = float)
 weight = 0.02
 weight_vector.fill(weight)
 prev_gra = np.zeros([p,1], dtype = float)
-learning_rate = 0.0001
+learning_rate = 1
 iterations = 200000
 
 for i in range(iterations):
@@ -72,7 +71,6 @@ for i in range(iterations):
 
 
 # PM 2.5 Calculation
-
 testing_data = open(sys.argv[2], "r")
 row = csv.reader(testing_data, delimiter = ",")
 test_x = []
@@ -82,12 +80,13 @@ row_counter = 0
 for r in row:
     if row_counter%18 == 0:
         rows_counter = rows_counter + 1
-        test_x.append([0.5])
+        test_x.append([1])
     for i in range(11-len(hours),11):
         if row_counter%18 in features:
             if r[i] != "NR":
                 test_x[rows_counter].append(float(r[i]))
                 if row_counter%18 in squares:
+                    #append the square terms
                     test_x[rows_counter].append(float(r[i])**2)
             else:
                 test_x[rows_counter].append(float(0))
