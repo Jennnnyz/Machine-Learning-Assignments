@@ -31,7 +31,7 @@ train_x = []
 train_y = []
 hours = range(2,9)
 #features: AMB_TEMP, NOx, O3, PM10, PM2.5, RH
-features = [0,7,8,9,11,16]
+features = [0, 7, 8, 9, 11, 16] 
 squares = [8,9]
 rows = len(features)
 
@@ -52,10 +52,13 @@ train_y = np.asarray(train_y).reshape((len(train_y),1))
 
 
 # Polynomial Regression and Gradient Descent
-weight_vector = np.dot(np.dot(np.linalg.inv(np.dot(train_x.T, train_x)), train_x.T),train_y)
+alpha = 1
+identity = np.identity(train_x.shape[1])
+regularization_term = np.dot(np.linalg.inv(alpha * identity), alpha * identity)
+weight_vector = np.dot(np.dot(np.linalg.inv(np.dot(train_x.T, train_x)+regularization_term), train_x.T),train_y)
 prev_gra = np.zeros([p,1], dtype = float)
 learning_rate = 0.0001
-iterations = 20000
+iterations = 200
 
 for i in range(iterations):
     y_prime = np.dot(train_x, weight_vector)
