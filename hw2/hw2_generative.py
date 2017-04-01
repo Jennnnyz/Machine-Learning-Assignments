@@ -9,10 +9,10 @@ import pandas as pd
 import scipy
 import math
 
-train_x = np.genfromtxt(sys.argv[13,dtype = float, delimiter = ',',skip_header=1)
+train_x = np.genfromtxt(sys.argv[3],dtype = float, delimiter = ',',skip_header=1)
 train_y = np.genfromtxt(sys.argv[4],dtype = float)
 
-omitted = [1]
+omitted = [14,52,105]
 sums = []
 for s in sums:
     train_x[:,s[0]] = np.sum(train_x[:,s], axis=1)
@@ -55,6 +55,7 @@ for i in range(train_x.shape[0]):
         
 class0_cov = class0_cov / class0_size
 class1_cov = class1_cov / class1_size
+total_size = class0_size + class1_size
 
 total_cov = (class0_size/total_size)*class0_cov + (class1_size/total_size)*class1_cov
 
@@ -108,7 +109,7 @@ with open(sys.argv[6],'w') as csvfile:
     writer.writerow(["id","label"])
     row_counter = 1
     for row in test_y:
-        if row[0] >=0.5:
+        if row < 0.5:
             boolean = int(1)
         else:
             boolean = int(0)
