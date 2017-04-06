@@ -63,7 +63,7 @@ total_cov = (class0_size/total_size)*class0_cov + (class1_size/total_size)*class
 #sigmoid function
 def sigmoid(z):
     ans = 1 / (1.0 + np.exp(-z))
-    return np.clip(res, 0.00000000000001, 0.99999999999999) 
+    return np.clip(ans, 0.00000000000001, 0.99999999999999) 
 
 #probability function
 def probablity(x, mean0, mean1, cov):
@@ -72,28 +72,7 @@ def probablity(x, mean0, mean1, cov):
     x = x.T
     b = -0.5*np.dot(np.dot((mean0),cov_inv),mean0)+0.5*np.dot(np.dot((mean1),cov_inv),mean1)+math.log(float(class0_size)/class1_size)
     z = np.dot(w,x) + b
-    return 1.0/(1.0+math.exp(-z))
-
-
-
-prob_y = []
-counter = 0
-for row in train_x:
-    prob_y.append(probablity(row, class0_mean, class1_mean, total_cov))
-    counter = counter + 1
-
-
-matched = 0
-counter = 0
- 
-for i in range(len(prob_y)):
-    if prob_y[i] < 0.5 and bool(train_y[i]):
-        matched = matched + 1
-    elif prob_y[i] >= 0.5 and not bool(train_y[i]):
-        matched = matched + 1
-
-accuracy = float(matched)/train_y.shape[0]
-print(accuracy)
+    return sigmoid(z)
 
 
 #predict
