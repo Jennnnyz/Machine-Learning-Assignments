@@ -13,7 +13,7 @@ train_x = np.genfromtxt(sys.argv[3],dtype = float, delimiter = ',',skip_header=1
 train_y = np.genfromtxt(sys.argv[4],dtype = float)
 
 omitted = [14,52,105]
-sums = []
+sums = [[102,105]]
 for s in sums:
     train_x[:,s[0]] = np.sum(train_x[:,s], axis=1)
 train_x = np.delete(train_x, omitted, 1)
