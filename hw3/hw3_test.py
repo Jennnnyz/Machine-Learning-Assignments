@@ -39,7 +39,7 @@ model.add(Activation('relu'))
 model.add(Dropout(0.25))
 model.add(Dense(num_classes))
 model.add(Activation('softmax'))
-model.load_weights("weight.h5")
+model.load_weights("myWeights.h5")
 
 def load_data():
     train_data =open(sys.argv[1], 'r')
