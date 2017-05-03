@@ -107,11 +107,11 @@ def load_data():
     
 (train_x,train_y),(validation_x,validation_y) = load_data()
 
-datagen = ImageDataGenerator(
-        rotation_range=10,
-        width_shift_range=0.2,
-        height_shift_range=0.2,
-        horizontal_flip=True)
+#datagen = ImageDataGenerator(
+#        rotation_range=10,
+#        width_shift_range=0.2,
+#        height_shift_range=0.2,
+#        horizontal_flip=True)
 
 
 model = Sequential()
@@ -143,7 +143,5 @@ callback = EarlyStopping(monitor = 'val_loss', min_delta = 0.00, patience = 1)
 #model.fit_generator(datagen.flow(train_x, train_y, batch_size = batch_size), steps_per_epoch= train_x.shape[0]/batch_size, callbacks = [callback], validation_data = (validation_x, validation_y))
 model.fit(train_x,train_y,batch_size=batch_size,epochs=epochs, shuffle = True, callbacks = [callback], validation_data = (validation_x, validation_y))
 score = model.evaluate(train_x, train_y , batch_size = batch_size)
-print ('Train Acc:', score[1])
 
-model.save("myModel.h5")
-model.save_weights("weight.h5")
+model.save_weights("myWeights.h5")
