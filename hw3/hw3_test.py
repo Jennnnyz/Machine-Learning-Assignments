@@ -12,7 +12,34 @@ from keras.optimizers import SGD, Adam
 from keras.utils import np_utils
 from keras.models import load_model
 
-model = load_model("myModel.h5")
+np.random.seed(1414)
+
+epochs = 12
+batch_size = 80
+pool_size1 = (2,2)
+nb_filter1 = (3,3)
+num_classes = 7
+
+model = Sequential()
+model.add(Conv2D(32,nb_filter1,input_shape=(48,48,1)))
+
+model.add(Conv2D(32,nb_filter1))
+model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size = pool_size1))
+model.add(Dropout(0.25))
+
+model.add(Conv2D(64,nb_filter1))
+model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size = pool_size1))
+model.add(Dropout(0.25))
+
+model.add(Flatten())
+model.add(Dense(1028))
+model.add(Activation('relu'))
+model.add(Dropout(0.25))
+model.add(Dense(num_classes))
+model.add(Activation('softmax'))
+model.load_weights("weight.h5")
 
 def load_data():
     train_data =open(sys.argv[1], 'r')
