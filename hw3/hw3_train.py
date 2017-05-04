@@ -142,6 +142,14 @@ validation_x = validation_x.reshape(validation_x.shape[0], 48, 48, 1)
 callback = EarlyStopping(monitor = 'val_loss', min_delta = 0.00, patience = 1)
 #model.fit_generator(datagen.flow(train_x, train_y, batch_size = batch_size), steps_per_epoch= train_x.shape[0]/batch_size, callbacks = [callback], validation_data = (validation_x, validation_y))
 model.fit(train_x,train_y,batch_size=batch_size,epochs=epochs, shuffle = True, callbacks = [callback], validation_data = (validation_x, validation_y))
-score = model.evaluate(train_x, train_y , batch_size = batch_size)
+
+for layer in model.layers[:3]:
+    layer.trainable = False
+
+model.compile(loss='categorical_crossentropy',optimizer=SGD(lr=1e-4, momentum = 0.9),metrics=['accuracy'])
+train_x=train_x.reshape(train_x.shape[0],48,48,1)
+validation_x = validation_x.reshape(validation_x.shape[0], 48, 48, 1)
+callback = EarlyStopping(monitor = 'val_loss', min_delta = 0.00, patience = 1)
+model.fit(train_x,train_y,batch_size=batch_size,epochs=20, shuffle = True, callbacks = [callback], validation_data = (validation_x, validation_y))
 
 model.save_weights("myWeights.h5")
