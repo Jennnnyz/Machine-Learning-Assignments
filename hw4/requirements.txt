@@ -1,0 +1,7 @@
+matplotlib==2.0.0
+nltk==3.2.2
+word2vec==0+unknown
+numpy==1.12.1
+Pillow==4.1.1
+adjustText==0.6.1
+scikit_learn==0.18.1
