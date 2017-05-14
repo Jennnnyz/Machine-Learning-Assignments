@@ -6,8 +6,9 @@ from math import log
 from sklearn.svm import LinearSVR as SVR
 from sklearn import tree
 from sklearn.neighbors import NearestNeighbors
+from PIL import Image
 
-np.random.seed(1414)
+np.random.seed(17)
 
 
 def load_data(testfile, trainfile, trainfile1):
@@ -15,6 +16,17 @@ def load_data(testfile, trainfile, trainfile1):
     train_data = np.load(trainfile)
     train_data1 = np.load(trainfile1)
     return test_data, train_data, train_data1
+
+#def load_images(folder):
+#    data = []
+#    for i in range(481):
+#        name = folder + 'hand.seq' + str(i+1) + '.png'
+#        img = Image.open(name)
+#        img = img.crop((0,0,480,480))
+#        img = img.resize((10,10), Image.ANTIALIAS)
+#        img = np.array(img)
+#        data.append(img)
+#    data = np.asarray(data).reshape(481, 10*10)
 
 def get_eigenvalues(data):
     SAMPLE = 20 # sample some points to estimate
@@ -65,8 +77,9 @@ def main():
         data = test_data[str(i)]
         vs = get_eigenvalues(data)
         test_X.append(vs)
+        #print(i)
     test_X = np.array(test_X)
-    pred_y = svr.predict(test_X)
+    pred_y = clf.predict(test_X)
 
     save_results(sys.argv[2], pred_y)
     return 0
