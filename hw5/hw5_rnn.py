@@ -18,13 +18,12 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.layers.convolutional import Conv1D
 from keras.layers.convolutional import MaxPooling1D
 from keras.initializers import RandomNormal
-from nltk.corpus import stopwords
 
 np.random.seed(1717)
 
 embedding_dim = 100
 thresh = 0.4
-stop_words = [word.encode('ascii', 'ignore') for word in stopwords.words("english")]
+stop_words = pickle.load(open("stopwords.p","rb"))
 
 
 def load_data(path, training):
