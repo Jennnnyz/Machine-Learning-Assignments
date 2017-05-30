@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import csv
+import sys
 from keras.models import Sequential
 from keras.layers import Activation ,Embedding, Reshape, Merge, Dropout, Dense
 from keras.layers.merge import Dot
@@ -145,7 +146,7 @@ def main():
 	#history = model.fit([user,movie], rating, epochs = 50, validation_split = 0.1, verbose = 1, callbacks = [earlystopping, checkpoint])
 
 	model.load_weights("best_tuned.hdf5")
-	save_result('result.csv','test.csv', model)
+	save_result(sys.argv[2],sys.argv[1]+'/test.csv', model)
 
 
 if __name__ == '__main__':
