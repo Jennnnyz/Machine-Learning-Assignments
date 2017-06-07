@@ -1,2 +1,2 @@
 #!/bin/bash
-python2.7 hw6.py $1 $2
+python2.7 hw6_best.py $1 $2
