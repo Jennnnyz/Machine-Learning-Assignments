@@ -3,8 +3,8 @@ import pandas as pd
 import csv
 import sys
 from keras.models import Sequential
-from keras.layers import Activation ,Embedding, Reshape, Merge, Dropout, Dense
-from keras.layers.merge import Dot
+from keras.layers import Input, Activation ,Embedding, Reshape, Merge, Dropout, Dense, Flatten
+from keras.layers.merge import Dot, Add, Concatenate
 from keras.callbacks import Callback, EarlyStopping, ModelCheckpoint
 from keras.optimizers import Adamax
 import keras
@@ -29,6 +29,38 @@ def myModel(users_num, movies_num):
 
 	return model
 
+def MFModel(users_num, movies_num, latent_dim = 666):
+	user_input = Input(shape = [1])
+	item_input = Input(shape= [1])
+	user_vec = Embedding(users_num + 1, latent_dim)(user_input)
+	user_vec = Flatten()(user_vec)
+	item_vec = Embedding(users_num + 1, latent_dim)(item_input)
+	item_vec = Flatten()(item_vec)
+	user_bias = Embedding(users_num + 1, 1, embeddings_initializer = "zeros")(user_input)
+	user_bias = Flatten()(user_bias)
+	item_bias = Embedding(movies_num + 1, 1, embeddings_initializer = "zeros")(item_input)
+	item_bias = Flatten()(item_bias)
+	r_hat = Dot(axes = 1)([user_bias, item_bias])
+	r_hat = Add()([r_hat, user_bias, item_bias])
+	model = keras.models.Model([user_input, item_input], r_hat)
+
+	return model
+
+def nnModel(users_num, movies_num, latent_dim = 128):
+	user_input = Input(shape = [1])
+	item_input = Input(shape= [1])
+	user_vec = Embedding(users_num + 1, latent_dim)(user_input)
+	user_vec = Flatten()(user_vec)
+	item_vec = Embedding(users_num + 1, latent_dim)(item_input)
+	item_vec = Flatten()(item_vec)
+	merge_vec = Concatenate()([user_vec, item_vec])
+	hidden = Dense(150, activation = 'relu')(merge_vec)
+	hidden = Dense(50, activation = 'relu')(hidden)
+	output = Dense(1)(hidden)
+	model = keras.models.Model([user_input, item_input], output)
+
+	return model
+
 def load_data(train,users,movies):
 
 	def shuffle(data):
@@ -37,13 +69,18 @@ def load_data(train,users,movies):
 		movie = shuffled['MovieID'].values
 		rating = shuffled['Rating'].values
 
-		return (user,movie,rating)
+		difference = rating.max() - rating.min()
+		mean = rating.mean()
+
+		rating = (rating - mean) / difference
+
+		return (user,movie,rating),difference,mean
 
 	data = pd.read_csv(train, sep = ',', usecols = ['TrainDataID', 'UserID', 'MovieID', 'Rating'])
 	max_userid = data['UserID'].drop_duplicates().max()
 	max_movieid = data['MovieID'].drop_duplicates().max()
 
-	(user, movie, rating) = shuffle(data)
+	(user, movie, rating),difference,mean = shuffle(data)
 
 
 	#user = []
@@ -97,9 +134,9 @@ def load_data(train,users,movies):
 	#with open('train.p','w') as train_p:
 	#	pickle.dump(data,train_p)
 
-	return (user,movie,rating,max_userid,max_movieid)
+	return (user,movie,rating,max_userid,max_movieid),(difference,mean)
 
-def save_result(filepath,test, model):
+def save_result(filepath,test, model,difference,mean):
 	def rate(model, user_id, movie_id):
 		user = np.asarray([user_id],dtype = np.int64)
 		movie = np.asarray([movie_id],dtype = np.int64)
@@ -113,7 +150,7 @@ def save_result(filepath,test, model):
 			skip = True
 			for r in row:
 				if not skip:
-					rating = rate(model,r[1],r[2])
+					rating = rate(model,r[1],r[2]) * difference + mean
 					if rating < 0.0:
 						writer.writerow([r[0],float(0)])
 					elif rating > 5.0:
@@ -124,29 +161,32 @@ def save_result(filepath,test, model):
 
 def main():
 
-	#(user, movie, rating, max_userid, max_movieid) = load_data("train.csv", "users.csv", "movies.csv")
+	#(user, movie, rating, max_userid, max_movieid),(difference,mean) = load_data("train.csv", "users.csv", "movies.csv")
 	#max_userid = 6040, max_movieid = 3952
 	#users_num = max_userid
 	#movies_num = max_movieid
 	users_num = 6040
 	movies_num = 3952
 
-	model = myModel(users_num, movies_num)
+	difference = 4
+	mean = 3.58171208604
+
+	model = MFModel(users_num, movies_num,latent_dim = 128)
 	#model.compile(loss = 'mse', optimizer = 'adamax')
 	#earlystopping = EarlyStopping('val_loss', patience = 2)
-	#checkpoint = ModelCheckpoint(filepath = '/home/jennyz1105/best.hdf5', verbose = 1, save_weights_only = True, save_best_only=True)
-	#history = model.fit([user,movie], rating, epochs = 12, validation_split = 0.1, verbose = 1, callbacks = [earlystopping, checkpoint])
+	#checkpoint = ModelCheckpoint(filepath = 'normalizedMFbest.hdf5', verbose = 1, save_weights_only = True, save_best_only=True)
+	#history = model.fit([user,movie], rating, epochs = 50, validation_split = 0.1, verbose = 1, callbacks = [earlystopping, checkpoint])
 
-	#model.load_weights("best.hdf5")
+	#model.load_weights("normalizedMFbest.hdf5")
 
 	#opt = Adamax(lr = 0.00002)
 	#model.compile(loss = 'mse', optimizer = opt)
 	#earlystopping = EarlyStopping('val_loss', patience = 2)
-	#checkpoint = ModelCheckpoint(filepath = 'best_tuned.hdf5', verbose = 1, save_weights_only = True, save_best_only=True)
+	#checkpoint = ModelCheckpoint(filepath = 'normalizedMFbest_tuned.hdf5', verbose = 1, save_weights_only = True, save_best_only=True)
 	#history = model.fit([user,movie], rating, epochs = 50, validation_split = 0.1, verbose = 1, callbacks = [earlystopping, checkpoint])
 
-	model.load_weights("best_tuned.hdf5")
-	save_result(sys.argv[2],sys.argv[1]+'/test.csv', model)
+	model.load_weights("normalizedMFbest_tuned.hdf5")
+	save_result(sys.argv[2],sys.argv[1]+'test.csv', model,difference, mean)
 
 
 if __name__ == '__main__':
